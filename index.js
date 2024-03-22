@@ -18,7 +18,7 @@ app.use(cookieParser());
 
 const corsOption ={
   // origin:"http://localhost:5173",
-  origin:"https://hello-app-frontend.vercel.app",
+  origin:"https://hello-frontend-livid.vercel.app",
   credentials:true
 }
 app.use(cors(corsOption));

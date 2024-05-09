@@ -85,7 +85,6 @@ export const getAllPosts = async (req, res) => {
 	}
 };
 
-    }
 // get total posts
 
 export const getPosts = async (req, res) => {

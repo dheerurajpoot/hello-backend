@@ -91,13 +91,24 @@ export const logOut = (req, res) => {
 	});
 };
 // get profile data
-
 export const getProfile = async (req, res) => {
 	try {
 		const id = req.params.id;
 		const user = await User.findOne({ _id: id }).select("-password");
 		return res.status(200).json({
 			user,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ error: "Internal server error" });
+	}
+};
+// get all users
+export const getAllUsers = async (req, res) => {
+	try {
+		const allUsers = await User.find().select("-password");
+		return res.status(200).json({
+			allUsers,
 		});
 	} catch (error) {
 		console.log(error);

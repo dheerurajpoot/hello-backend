@@ -6,12 +6,9 @@ var postSchema = new mongoose.Schema(
 		description: {
 			type: String,
 		},
-		images: [
-			{
-				public_id: String,
-				url: String,
-			},
-		],
+		image: {
+			type: String,
+		},
 		like: {
 			type: Array,
 			default: [],

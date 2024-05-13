@@ -3,7 +3,7 @@ import { User } from "../models/userSchema.js";
 
 export const creatPost = async (req, res) => {
 	try {
-		const { description, id } = req.body;
+		const { description, image, id } = req.body;
 		if (!description || !id) {
 			return res.status(401).json({
 				message: "fields are required!",
@@ -13,6 +13,7 @@ export const creatPost = async (req, res) => {
 		const user = await User.findById(id).select("-password");
 		await Post.create({
 			description,
+			image,
 			userID: id,
 			userDetails: user,
 		});

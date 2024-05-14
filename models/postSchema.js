@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // Declare the Schema of the Mongo model
-var postSchema = new mongoose.Schema(
+let postSchema = new mongoose.Schema(
 	{
 		description: {
 			type: String,

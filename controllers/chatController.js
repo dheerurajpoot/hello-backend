@@ -3,7 +3,7 @@ import { Chat } from "../models/chatSchema.js";
 // create user chat
 export const createChat = async (req, res) => {
 	const newChat = new Chat({
-		members: [req.body.senderId, req.body.receiverId],
+		members: { sender: req.body.senderId, receiver: req.body.receiverId },
 	});
 	try {
 		const result = await newChat.save();
@@ -17,9 +17,10 @@ export const createChat = async (req, res) => {
 export const userChats = async (req, res) => {
 	try {
 		const userChat = await Chat.find({
-			members: { $all: [req.params.userId] },
-			"members.0": req.params.userId,
-		});
+			"members.sender": req.params.userId,
+		})
+			.populate("members.receiver")
+			.exec();
 		res.status(200).json(userChat);
 	} catch (error) {
 		res.status(500).json(error);
@@ -30,7 +31,8 @@ export const userChats = async (req, res) => {
 export const findChat = async (req, res) => {
 	try {
 		const chat = await Chat.findOne({
-			members: { $all: [req.params.firstId, req.params.secondId] },
+			"members.sender": req.params.firstId,
+			"members.receiver": req.params.secondId,
 		});
 		res.status(200).json(chat);
 	} catch (error) {

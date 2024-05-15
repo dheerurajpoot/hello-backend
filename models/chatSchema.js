@@ -3,7 +3,14 @@ import mongoose from "mongoose";
 let chatSchema = new mongoose.Schema(
 	{
 		members: {
-			type: Array,
+			sender: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+			},
+			receiver: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+			},
 		},
 	},
 	{ timestamps: true }

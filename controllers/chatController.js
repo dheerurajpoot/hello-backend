@@ -17,7 +17,10 @@ export const createChat = async (req, res) => {
 export const userChats = async (req, res) => {
 	try {
 		const userChat = await Chat.find({
-			"members.sender": req.params.userId,
+			$or: [
+				{ "members.sender": req.params.userId },
+				{ "members.receiver": req.params.userId },
+			],
 		})
 			.populate("members.receiver")
 			.exec();

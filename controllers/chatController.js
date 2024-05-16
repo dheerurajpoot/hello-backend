@@ -22,6 +22,7 @@ export const userChats = async (req, res) => {
 				{ "members.receiver": req.params.userId },
 			],
 		})
+			.populate("members.sender")
 			.populate("members.receiver")
 			.exec();
 		res.status(200).json(userChat);

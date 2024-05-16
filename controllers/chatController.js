@@ -2,14 +2,26 @@ import { Chat } from "../models/chatSchema.js";
 
 // create user chat
 export const createChat = async (req, res) => {
-	const newChat = new Chat({
-		members: { sender: req.body.senderId, receiver: req.body.receiverId },
-	});
 	try {
+		const { senderId, receiverId } = req.body;
+
+		const existingChat = await Chat.findOne({
+			$or: [
+				{ "members.sender": senderId, "members.receiver": receiverId },
+				{ "members.sender": receiverId, "members.receiver": senderId },
+			],
+		});
+		if (existingChat) {
+			return res.status(200).json(existingChat);
+		}
+		const newChat = new Chat({
+			members: { sender: senderId, receiver: receiverId },
+		});
+
 		const result = await newChat.save();
 		res.status(200).json(result);
 	} catch (error) {
-		res.status(500).json(error);
+		res.status(500).json({ message: "Internal Server Error", error });
 	}
 };
 

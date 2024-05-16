@@ -1,6 +1,8 @@
 import { User } from "../models/userSchema.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 export const register = async (req, res) => {
 	try {
@@ -186,5 +188,114 @@ export const unFollow = async (req, res) => {
 		});
 	} catch (error) {
 		console.log(error);
+	}
+};
+
+// gemerate reset password token and send reset link
+
+export const requestPasswordReset = async (req, res) => {
+	try {
+		const { email } = req.body;
+		if (!email) {
+			return res.status(401).json({
+				message: "Email is required!",
+				success: false,
+			});
+		}
+
+		const user = await User.findOne({ email });
+		if (!user) {
+			return res.status(401).json({
+				message: "User with this email does not exist!",
+				success: false,
+			});
+		}
+
+		// Generate a reset token
+		const resetToken = crypto.randomBytes(20).toString("hex");
+
+		// Set token and expiration in the user's record
+		user.resetPasswordToken = resetToken;
+		user.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
+
+		await user.save();
+
+		// Send email with the reset token
+		const transporter = nodemailer.createTransport({
+			service: "gmail",
+			auth: {
+				user: process.env.EMAIL, // Your email
+				pass: process.env.EMAIL_PASSWORD, // Your email password
+			},
+		});
+
+		const mailOptions = {
+			to: user.email,
+			from: process.env.EMAIL,
+			subject: "Password Reset",
+			text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
+             Please click on the following link, or paste this into your browser to complete the process:\n\n
+             http://${req.headers.host}/reset/${resetToken}\n\n
+             If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+		};
+
+		transporter.sendMail(mailOptions, (error, response) => {
+			if (error) {
+				console.error("There was an error: ", error);
+			} else {
+				console.log("Response: ", response);
+				res.status(200).json({
+					message: "Password reset email sent",
+					success: true,
+				});
+			}
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+// reset password
+
+export const resetPassword = async (req, res) => {
+	try {
+		const { token, password } = req.body;
+		if (!token || !password) {
+			return res.status(401).json({
+				message: "All fields are required!",
+				success: false,
+			});
+		}
+
+		const user = await User.findOne({
+			resetPasswordToken: token,
+			resetPasswordExpires: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			return res.status(401).json({
+				message: "Password reset token is invalid or has expired.",
+				success: false,
+			});
+		}
+
+		// Hash the new password
+		const hashedPassword = await bcryptjs.hash(password, 12);
+
+		// Set the new password and clear the reset token fields
+		user.password = hashedPassword;
+		user.resetPasswordToken = undefined;
+		user.resetPasswordExpires = undefined;
+
+		await user.save();
+
+		return res.status(200).json({
+			message: "Password has been reset successfully.",
+			success: true,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ error: "Internal server error" });
 	}
 };

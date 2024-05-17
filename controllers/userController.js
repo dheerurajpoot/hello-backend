@@ -232,10 +232,10 @@ export const requestPasswordReset = async (req, res) => {
 		const mailOptions = {
 			to: user.email,
 			from: process.env.EMAIL,
-			subject: "Password Reset",
+			subject: "Password Reset Link",
 			text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
              Please click on the following link, or paste this into your browser to complete the process:\n\n
-             http://${req.headers.host}/reset/${resetToken}\n\n
+             http://localhost:5173/reset-password/${resetToken}\n\n
              If you did not request this, please ignore this email and your password will remain unchanged.\n`,
 		};
 
@@ -243,7 +243,6 @@ export const requestPasswordReset = async (req, res) => {
 			if (error) {
 				console.error("There was an error: ", error);
 			} else {
-				console.log("Response: ", response);
 				res.status(200).json({
 					message: "Password reset email sent",
 					success: true,

@@ -20,14 +20,18 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		followers: {
-			type: Array,
-			default: [],
-		},
-		following: {
-			type: Array,
-			default: [],
-		},
+		followers: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+			},
+		],
+		following: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+			},
+		],
 		resetPasswordToken: {
 			type: String,
 		},
@@ -38,5 +42,4 @@ const userSchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
-//Export the model
 export const User = mongoose.model("User", userSchema);

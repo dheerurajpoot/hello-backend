@@ -143,51 +143,80 @@ export const suggestedFriends = async (req, res) => {
 	}
 };
 
-//follow
+// Follow
 export const follow = async (req, res) => {
 	try {
 		const loggedInUserId = req.body.id;
 		const userId = req.params.id;
 		const loggedInUser = await User.findById(loggedInUserId);
 		const user = await User.findById(userId);
+
 		if (!user.followers.includes(loggedInUserId)) {
-			await user.updateOne({ $push: { followers: loggedInUserId } });
-			await loggedInUser.updateOne({ $push: { following: userId } });
+			user.followers.push(loggedInUserId);
+			loggedInUser.following.push(userId);
+			await user.save();
+			await loggedInUser.save();
 		} else {
 			return res.status(401).json({
-				message: `user already followed to ${user.name}`,
+				message: `User already followed ${user.name}`,
 			});
 		}
+
 		return res.status(200).json({
-			message: `${loggedInUser.name} just followed to ${user.name}`,
+			message: `${loggedInUser.name} just followed ${user.name}`,
 			success: true,
 		});
 	} catch (error) {
 		console.log(error);
+		res.status(500).json({ message: "Internal server error" });
 	}
 };
 
-//unfollow
+// Unfollow
 export const unFollow = async (req, res) => {
 	try {
 		const loggedInUserId = req.body.id;
 		const userId = req.params.id;
 		const loggedInUser = await User.findById(loggedInUserId);
 		const user = await User.findById(userId);
+
 		if (loggedInUser.following.includes(userId)) {
-			await user.updateOne({ $pull: { followers: loggedInUserId } });
-			await loggedInUser.updateOne({ $pull: { following: userId } });
+			user.followers.pull(loggedInUserId);
+			loggedInUser.following.pull(userId);
+			await user.save();
+			await loggedInUser.save();
 		} else {
 			return res.status(401).json({
-				message: `you have not followed to ${user.name}`,
+				message: `You have not followed ${user.name}`,
 			});
 		}
+
 		return res.status(200).json({
-			message: `${loggedInUser.name} unfollowed to ${user.name}`,
+			message: `${loggedInUser.name} unfollowed ${user.name}`,
 			success: true,
 		});
 	} catch (error) {
 		console.log(error);
+		res.status(500).json({ message: "Internal server error" });
+	}
+};
+
+// Get user with populated followers and following
+export const getUserWithFollowersAndFollowing = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const user = await User.findById(id)
+			.populate("followers", "name username email")
+			.populate("following", "name username email");
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		return res.status(200).json({ user });
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ message: "Internal server error" });
 	}
 };
 

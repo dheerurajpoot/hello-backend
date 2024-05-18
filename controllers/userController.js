@@ -105,6 +105,51 @@ export const getProfile = async (req, res) => {
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
+
+// Update user profile
+export const updateUserProfile = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { name, username, email, userDescription, profilePic } = req.body;
+
+		// if (!name || !username || !email || !userDescription || !profilePic) {
+		// 	return res.status(401).json({
+		// 		message: "All fields are required!",
+		// 		success: false,
+		// 	});
+		// }
+
+		const user = await User.findById(id);
+
+		if (!user) {
+			return res.status(404).json({
+				message: "User not found",
+				success: false,
+			});
+		}
+
+		user.name = name;
+		user.username = username;
+		user.email = email;
+		user.userDescription = userDescription;
+		user.profilePic = profilePic;
+
+		await user.save();
+
+		return res.status(200).json({
+			message: "Profile updated successfully",
+			success: true,
+			user,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			message: "Internal server error",
+			success: false,
+		});
+	}
+};
+
 // get all users
 export const getAllUsers = async (req, res) => {
 	try {

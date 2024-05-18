@@ -11,6 +11,7 @@ import {
 	resetPassword,
 	suggestedFriends,
 	unFollow,
+	updateUserProfile,
 } from "../controllers/userController.js";
 import userAuth from "../middilewares/userAuth.js";
 
@@ -20,6 +21,7 @@ router.route("/login").post(logIn);
 router.route("/logout").get(logOut);
 router.route("/allusers").get(getAllUsers);
 router.route("/profile/:id").get(userAuth, getProfile);
+router.route("/update-profile/:id").put(userAuth, updateUserProfile);
 router.route("/suggested/:id").get(userAuth, suggestedFriends);
 router.route("/follow/:id").post(userAuth, follow);
 router.route("/unfollow/:id").post(userAuth, unFollow);

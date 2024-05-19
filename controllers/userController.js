@@ -251,8 +251,8 @@ export const getUserWithFollowersAndFollowing = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const user = await User.findById(id)
-			.populate("followers", "name username email")
-			.populate("following", "name username email");
+			.populate("followers", "name username email profilePic")
+			.populate("following", "name username email profilePic");
 
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
@@ -265,7 +265,7 @@ export const getUserWithFollowersAndFollowing = async (req, res) => {
 	}
 };
 
-// gemerate reset password token and send reset link
+// generate reset password token and send reset link
 
 export const requestPasswordReset = async (req, res) => {
 	try {
